@@ -1,6 +1,6 @@
 [package]
 name = "lcd1602-diver"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 keywords = ["no-std", "lcd-driver", "lcd-I2C-bus", "lcd1602", "PCF8574-I2C-bus"]
 categories = ["embedded", "no-std"]
