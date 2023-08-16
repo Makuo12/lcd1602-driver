@@ -1,0 +1,25 @@
+[package]
+name = "stm32f7_lcd"
+version = "0.1.0"
+edition = "2021"
+authors = ["Imran K<immu0396@gmail.com>"]
+license = "MIT"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cortex-m = "0.7.7"
+cortex-m-rt = "0.7.3"
+lcd1602-diver = {path = "../../../"}
+
+# board-specific features
+[dependencies.stm32f7xx-hal]
+version = "0.7.0"
+features = ["stm32f746"]
+
+
+[profile.release]
+codegen-units = 1
+debug = true
+lto = true
