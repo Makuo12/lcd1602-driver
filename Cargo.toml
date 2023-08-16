@@ -6,6 +6,7 @@ keywords = ["no-std", "lcd-driver", "lcd-I2C-bus", "lcd1602", "PCF8574-I2C-bus"]
 categories = ["embedded", "no-std"]
 description = "A driver for the LCD1602 display using the PCF8574 I2C bus"
 authors = ["Imran K <immu0396@gmail.com>"]
+repository = "https://github.com/imrank03/lcd1602-driver"
 license = "MIT"
 
 
