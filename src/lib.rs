@@ -15,6 +15,9 @@ extern crate bitflags;
 
 /// The types of bus that can be used to communicate with the display.
 pub mod data_bus;
+
+use core::ops::Deref;
+use embedded_hal::delay::DelayNs;
 use data_bus::{DataBus, EightBitBus, FourBitBus, I2CBus};
 
 /// Display module for 16x2 LCD displays
@@ -29,9 +32,8 @@ use entry_mode::{CursorMode, EntryMode, ShiftMode};
 pub mod error;
 use error::Result;
 
-use embedded_hal::blocking::delay::{DelayMs, DelayUs};
-use embedded_hal::blocking::i2c;
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::digital::OutputPin;
+use embedded_hal::i2c::I2c;
 
 /**
 Handles all the logic related to working with the character LCD via I2C. You'll
@@ -76,7 +78,7 @@ impl<
     /// - The enable pin is used to tell the `LCD1602` that there
     /// is data on the 8 data pins and that it should read them in.
     ///
-    pub fn new_8bit<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn new_8bit<D: DelayNs>(
         rs: RS,
         en: EN,
         d0: D0,
@@ -123,7 +125,7 @@ impl<RS: OutputPin, EN: OutputPin, D4: OutputPin, D5: OutputPin, D6: OutputPin, 
     /// broken up into it's upper and lower nibbles (4 bits) before
     /// being sent over the data bus
     ///
-    pub fn new_4bit<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn new_4bit<D: DelayNs>(
         rs: RS,
         en: EN,
         d4: D4,
@@ -144,7 +146,7 @@ impl<RS: OutputPin, EN: OutputPin, D4: OutputPin, D5: OutputPin, D6: OutputPin, 
     }
 }
 
-impl<I2C: i2c::Write> LCD1602<I2CBus<I2C>> {
+impl<I2C: I2c> LCD1602<I2CBus<I2C>> {
     /// Create an instance of a `LCD1602` from an i2c write peripheral,
     /// the `LCD1602` I2C address and a struct implementing the delay trait.
     /// - The delay instance is used to sleep between commands to
@@ -154,7 +156,7 @@ impl<I2C: i2c::Write> LCD1602<I2CBus<I2C>> {
     ///
     /// This mode operates on an I2C bus, using an I2C to parallel port expander
     ///
-    pub fn new_i2c<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn new_i2c<D: DelayNs>(
         i2c_bus: I2C,
         address: u8,
         delay: &mut D,
@@ -180,7 +182,7 @@ where
     /// ```rust,ignore
     /// lcd.reset();
     /// ```
-    pub fn reset<D: DelayUs<u16> + DelayMs<u8>>(&mut self, delay: &mut D) -> Result<()> {
+    pub fn reset<D: DelayNs>(&mut self, delay: &mut D) -> Result<()> {
         self.write_command(0b0000_0010, delay)?;
 
         Ok(())
@@ -191,7 +193,7 @@ where
     ///
     /// Note: This is equivilent to calling all of the other relavent
     /// methods however this operation does it all in one go to the `LCD1602`
-    pub fn set_display_mode<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn set_display_mode<D: DelayNs>(
         &mut self,
         display_mode: DisplayMode,
         delay: &mut D,
@@ -210,7 +212,7 @@ where
     /// ```rust,ignore
     /// lcd.clear();
     /// ```
-    pub fn clear<D: DelayUs<u16> + DelayMs<u8>>(&mut self, delay: &mut D) -> Result<()> {
+    pub fn clear<D: DelayNs>(&mut self, delay: &mut D) -> Result<()> {
         self.write_command(0b0000_0001, delay)?;
 
         Ok(())
@@ -222,7 +224,7 @@ where
     /// ```rust,ignore
     /// lcd.set_autoscroll(true);
     /// ```
-    pub fn set_autoscroll<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn set_autoscroll<D: DelayNs>(
         &mut self,
         enabled: ShiftMode,
         delay: &mut D,
@@ -237,7 +239,7 @@ where
     }
 
     /// Set if the cursor should be visible
-    pub fn set_cursor_visibility<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn set_cursor_visibility<D: DelayNs>(
         &mut self,
         visibility: Cursor,
         delay: &mut D,
@@ -252,7 +254,7 @@ where
     }
 
     /// Set if the characters on the display should be visible
-    pub fn set_display<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn set_display<D: DelayNs>(
         &mut self,
         display: Display,
         delay: &mut D,
@@ -267,7 +269,7 @@ where
     }
 
     /// Set if the cursor should blink
-    pub fn set_cursor_blink<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn set_cursor_blink<D: DelayNs>(
         &mut self,
         blink: CursorBlink,
         delay: &mut D,
@@ -290,7 +292,7 @@ where
     /// // Move left when a new character is written
     /// lcd.set_cursor_mode(CursorMode::Left)
     /// ```
-    pub fn set_cursor_mode<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn set_cursor_mode<D: DelayNs>(
         &mut self,
         mode: CursorMode,
         delay: &mut D,
@@ -310,7 +312,7 @@ where
     /// // Move to line 2
     /// lcd.set_cursor_pos(40)
     /// ```
-    pub fn set_cursor_pos<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn set_cursor_pos<D: DelayNs>(
         &mut self,
         position: u8,
         delay: &mut D,
@@ -328,7 +330,7 @@ where
     /// lcd.shift_cursor(Direction::Left);
     /// lcd.shift_cursor(Direction::Right);
     /// ```
-    pub fn shift_cursor<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn shift_cursor<D: DelayNs>(
         &mut self,
         dir: Direction,
         delay: &mut D,
@@ -349,7 +351,7 @@ where
     /// lcd.shift_display(Direction::Left);
     /// lcd.shift_display(Direction::Right);
     /// ```
-    pub fn shift_display<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn shift_display<D: DelayNs>(
         &mut self,
         dir: Direction,
         delay: &mut D,
@@ -372,7 +374,7 @@ where
     /// ```rust,ignore
     /// lcd.write_char('A', &mut delay)?; // prints 'A'
     /// ```
-    pub fn write_char<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn write_char<D: DelayNs>(
         &mut self,
         data: char,
         delay: &mut D,
@@ -380,7 +382,7 @@ where
         self.write_byte(data as u8, delay)
     }
 
-    fn write_command<D: DelayUs<u16> + DelayMs<u8>>(
+    fn write_command<D: DelayNs>(
         &mut self,
         cmd: u8,
         delay: &mut D,
@@ -392,15 +394,15 @@ where
         Ok(())
     }
 
-    fn init_4bit<D: DelayUs<u16> + DelayMs<u8>>(&mut self, delay: &mut D) -> Result<()> {
+    fn init_4bit<D: DelayNs>(&mut self, delay: &mut D) -> Result<()> {
         // Wait for the LCD to wakeup if it was off
-        delay.delay_ms(15u8);
+        delay.delay_ms(15u32);
 
         // Initialize Lcd in 4-bit mode
         self.bus.write(0x33, false, delay)?;
 
         // Wait for the command to be processed
-        delay.delay_ms(5u8);
+        delay.delay_ms(5u32);
 
         // Sets 4-bit operation and enables 5x7 mode for chars
         self.bus.write(0x32, false, delay)?;
@@ -440,15 +442,15 @@ where
     }
 
     // Follow the 8-bit setup procedure as specified in the LCD1602 datasheet
-    fn init_8bit<D: DelayUs<u16> + DelayMs<u8>>(&mut self, delay: &mut D) -> Result<()> {
+    fn init_8bit<D: DelayNs>(&mut self, delay: &mut D) -> Result<()> {
         // Wait for the LCD to wakeup if it was off
-        delay.delay_ms(15u8);
+        delay.delay_ms(15u32);
 
         // Initialize Lcd in 8-bit mode
         self.bus.write(0b0011_0000, false, delay)?;
 
         // Wait for the command to be processed
-        delay.delay_ms(5u8);
+        delay.delay_ms(5u32);
 
         // Sets 8-bit operation and enables 5x7 mode for chars
         self.bus.write(0b0011_1000, false, delay)?;
@@ -489,7 +491,7 @@ where
     /// ```rust,ignore
     /// lcd.write_str("Hello, World!", &mut delay)?;
     /// ```
-    pub fn write_str<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn write_str<D: DelayNs>(
         &mut self,
         string: &str,
         delay: &mut D,
@@ -503,7 +505,7 @@ where
     /// ```rust,ignore
     /// lcd.write_bytes(b"Hello, World!", &mut delay)?;
     /// ```
-    pub fn write_bytes<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn write_bytes<D: DelayNs>(
         &mut self,
         string: &[u8],
         delay: &mut D,
@@ -528,7 +530,7 @@ where
     /// lcd.write_byte(b'~', &mut delay)?; // usually prints 🡢
     /// lcd.write_byte(b'\x7f', &mut delay)?; // usually prints 🡠
     /// ```
-    pub fn write_byte<D: DelayUs<u16> + DelayMs<u8>>(
+    pub fn write_byte<D: DelayNs>(
         &mut self,
         data: u8,
         delay: &mut D,
