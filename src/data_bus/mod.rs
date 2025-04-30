@@ -1,10 +1,9 @@
-use embedded_hal::blocking::delay::{DelayMs, DelayUs};
-
 mod eightbit_bus;
 mod fourbit_bus;
 mod i2c_bus;
 mod fourbit_eightbit_bus;
 
+use embedded_hal::delay::DelayNs;
 pub use self::eightbit_bus::EightBitBus;
 pub use self::fourbit_bus::FourBitBus;
 pub use self::i2c_bus::I2CBus;
@@ -18,7 +17,7 @@ pub trait DataBus {
     /// `delay`: A delay provider.
     /// `data`: Whether the command is data or a command.
     /// Returns: `Ok(())` if the command was sent successfully, `Err(Error)` otherwise.
-    fn write<D: DelayUs<u16> + DelayMs<u8>>(
+    fn write<D: DelayNs>(
         &mut self,
         byte: u8,
         data: bool,
