@@ -1,8 +1,8 @@
 {
     "rust-analyzer.linkedProjects": [
-        // "./examples/stm32/stm32f0_lcd/Cargo.toml",
-        // "./examples/stm32/stm32f7_lcd/Cargo.toml",
-        // "./examples/stm32/stm32h7_lcd/Cargo.toml"
+        "./examples/stm32/stm32f0_lcd/Cargo.toml",
+        "./examples/stm32/stm32f7_lcd/Cargo.toml",
+        "./examples/stm32/stm32h7_lcd/Cargo.toml",
         "./examples/esp32/esp32c3_lcd/Cargo.toml",
     ]
 }
